@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Media Index</title>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script>
+        const tmdbApiKey = 'f074fd72d9f5b8be06fd7f56e9a12948';
+    </script>
+</head>
+<body>
+    <h1>Media Index</h1>
+    <div>
+        <label for="searchInput">Search:</label>
+        <input type="text" id="searchInput">
+        <button onclick="searchMedia()">Search</button>
+    </div>
+    <div>
+        <button onclick="showAll()">Show All</button>
+        <button onclick="showMovies()">Movies</button>
+        <button onclick="showWebSeries()">Web Series</button>
+        <button onclick="showTVShows()">TV Shows</button>
+        <button onclick="showNews()">News</button>
+    </div>
+    <ul id="fileList"></ul>
+
+    <script>
+        const sharedLink = 'https://itsshweta-my.sharepoint.com/:f:/g/personal/yamraj_itsshweta_onmicrosoft_com/Eh98Yr23sL5IuCoSpplJhd0BeLLzx6stmII9xyMpD8uAJA?e=hpDy0P';
+        const apiUrl = `https://api.onedrive.com/v1.0/shares/u!${sharedLink}/root/children`;
+
+        const mediaList = [];
+
+        $(document).ready(() => {
+            fetchMediaList();
+
+            function fetchMediaList() {
+                // Fetch the file list from OneDrive
+                fetch(apiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        mediaList.length = 0; // Clear the existing media list
+                        data.value.forEach(file => {
+                            mediaList.push({
+                                name: file.name,
+                                mimeType: file.file.mimeType,
+                            });
+                        });
+                        updateMediaDisplay(mediaList);
+                    })
+                    .catch(error => console.error('Error fetching data:', error));
+            }
+
+            function updateMediaDisplay(mediaData) {
+                const fileList = $('#fileList');
+                fileList.empty();
+
+                mediaData.forEach(media => {
+                    const listItem = $('<li>').text(media.name);
+
+                    if (media.mimeType.includes('video')) {
+                        fetchMovieDetails(media.name, listItem);
+                    }
+
+                    fileList.append(listItem);
+                });
+            }
+
+            function fetchMovieDetails(movieTitle, listItem) {
+                const tmdbApiUrl = `https://api.themoviedb.org/3/search/multi?api_key=${tmdbApiKey}&query=${encodeURIComponent(movieTitle)}`;
+
+                // Fetch movie details from TMDb
+                fetch(tmdbApiUrl)
+                    .then(response => response.json())
+                    .then(mediaData => {
+                        if (mediaData.results.length > 0) {
+                            const media = mediaData.results[0];
+                            const posterUrl = `https://image.tmdb.org/t/p/w200${media.poster_path}`;
+
+                            // Display media details and poster
+                            listItem.append(`<p>Title: ${media.title || media.name}</p>`);
+                            listItem.append(`<p>Overview: ${media.overview}</p>`);
+                            listItem.append(`<img src="${posterUrl}" alt="${media.title || media.name} Poster">`);
+                        }
+                    })
+                    .catch(error => console.error('Error fetching media details:', error));
+            }
+        });
+
+        function searchMedia() {
+            const searchTerm = $('#searchInput').val().toLowerCase();
+            const searchResults = mediaList.filter(media => media.name.toLowerCase().includes(searchTerm));
+            updateMediaDisplay(searchResults);
+        }
+
+        function showAll() {
+            updateMediaDisplay(mediaList);
+        }
+
+        function filterByType(type) {
+            const filteredMedia = mediaList.filter(media => media.mimeType.includes(type));
+            updateMediaDisplay(filteredMedia);
+        }
+
+        function showMovies() {
+            filterByType('video') // Adjust as needed based on actual file types
+        }
+
+        function showWebSeries() {
+            // Implement logic for web series
+        }
+
+        function showTVShows() {
+            // Implement logic for TV shows
+        }
+
+        function showNews() {
+            // Implement logic for news
+        }
+    </script>
+</body>
+</html>
