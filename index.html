@@ -7,7 +7,8 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script>
         const tmdbApiKey = 'f074fd72d9f5b8be06fd7f56e9a12948';
-        const apiUrl = 'https://itsshweta-my.sharepoint.com/:f:/g/personal/yamraj_itsshweta_onmicrosoft_com/Eh98Yr23sL5IuCoSpplJhd0BeLLzx6stmII9xyMpD8uAJA?e=hpDy0P';
+        const folderId = 'Eh98Yr23sL5IuCoSpplJhd0BeLLzx6stmII9xyMpD8uAJA'; // Replace with your actual folder ID
+        const apiUrl = `https://graph.microsoft.com/v1.0/me/drive/items/${folderId}/children?$expand=thumbnails`;
 
         const mediaList = [];
 
